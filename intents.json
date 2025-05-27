@@ -1,0 +1,42 @@
+{
+  "intents": [
+    {
+      "tag": "greeting",
+      "patterns": ["Hi", "Hello", "Hey", "What's up", "Yo"],
+      "responses": ["Yo, human!", "Hey! You good?", "Wassup!"]
+    },
+    {
+      "tag": "goodbye",
+      "patterns": ["Bye", "See you", "Later", "Goodbye"],
+      "responses": ["Later, nerd 🤓", "Peace out!", "Catch ya later!"]
+    },
+    {
+      "tag": "google",
+      "patterns": ["search", "google", "find", "lookup", "look up"],
+      "responses": ["Let me Google that for you..."]
+    },
+    {
+      "tag": "insult",
+      "patterns": ["You suck", "You're dumb", "Idiot"],
+      "responses": ["And you're still talking to me? 😎", "Dumb recognizes dumb 🤷"]
+    },
+    {
+      "tag": "thanks",
+      "patterns": ["Thanks", "Thank you", "thx"],
+      "responses": ["Anytime... I guess.", "No biggie, pal."]
+    },
+    {
+      "tag": "math",
+      "patterns": [
+        "What is 2 plus 2?",
+        "Calculate 5 times 3",
+        "What's 10 divided by 2?",
+        "Add 7 and 8",
+        "Subtract 4 from 9"
+      ],
+      "responses": [
+        "Let me do the math for you! (But I'm not very good at it yet.)"
+      ]
+    }
+  ]
+}
