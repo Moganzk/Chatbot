@@ -1,5 +1,5 @@
-# Use Python 3.10
-FROM python:3.10
+# Use Python 3.13.4
+FROM python:3.13.4
 
 # Set working directory
 WORKDIR /app
