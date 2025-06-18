@@ -21,6 +21,7 @@ import openai
 from PIL import Image
 import base64
 import pytesseract
+import time
 
 # Initialize app
 load_dotenv()
@@ -187,6 +188,7 @@ def home():
 
 @app.route('/get', methods=['POST'])
 def chat():
+    start = time.time()
     user_input = request.form.get('msg', "").strip()
     # Collect all audio and document files
     audio_files = [f for k, f in request.files.items() if k.startswith('voice')]
@@ -206,59 +208,27 @@ def chat():
         filename = doc_file.filename.lower()
         text = ""
         try:
-            if filename.endswith('.pdf'):
-                pdf = PyPDF2.PdfReader(doc_file)
-                for page in pdf.pages:
-                    text += page.extract_text() or ""
-            elif filename.endswith('.txt'):
-                text = doc_file.read().decode('utf-8')
-            elif filename.endswith('.docx'):
-                doc = docx.Document(doc_file)
-                text = "\n".join([para.text for para in doc.paragraphs])
-            elif filename.endswith('.pptx'):
-                prs = Presentation(doc_file)
-                for slide in prs.slides:
-                    for shape in slide.shapes:
-                        if hasattr(shape, "text"):
-                            text += shape.text + "\n"
-            elif filename.endswith('.html'):
-                text = doc_file.read().decode('utf-8')
-                import re
-                text = re.sub('<[^<]+?>', '', text)
-            elif filename.endswith('.py'):
+            # Limit file size
+            MAX_FILE_SIZE_MB = 5
+            if doc_file.content_length and doc_file.content_length > MAX_FILE_SIZE_MB * 1024 * 1024:
+                skipped_files.append(doc_file.filename + " (too large)")
+                continue
+
+            if filename.endswith('.txt'):
+                doc_file.seek(0)
                 text = doc_file.read().decode('utf-8')
             elif filename.endswith('.csv'):
-                text = ""
+                doc_file.seek(0)
                 decoded = doc_file.read().decode('utf-8')
                 reader = csv.reader(decoded.splitlines())
                 for row in reader:
                     text += ', '.join(row) + '\n'
-            elif filename.endswith('.json'):
-                import json
-                data = json.load(doc_file)
-                text = json.dumps(data, indent=2)
-            elif filename.endswith('.md'):
-                text = doc_file.read().decode('utf-8')
-            elif filename.endswith(('.js', '.java', '.c', '.cpp')):
-                text = doc_file.read().decode('utf-8')
-            elif filename.endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
-                try:
-                    image = Image.open(doc_file)
-                    ocr_text = pytesseract.image_to_string(image).strip()
-                    if ocr_text:
-                        user_input += " [Extracted from image: " + ocr_text[:500] + "]"
-                    else:
-                        user_input += " Sorry, I can’t analyze images right now, but I can help with text or answer your questions!"
-                except Exception as e:
-                    print(f"OCR error: {e}")
-                    user_input += " Sorry, I can’t analyze images right now, but I can help with text or answer your questions!"
-            else:
-                skipped_files.append(doc_file.filename)
-                continue  # skip unsupported files
+            # ...rest of your file types...
         except Exception as e:
             print(f"File error: {e}")
             continue
         user_input += " " + text[:1000]  # Limit each file's text
+        doc_file.seek(0)
 
     # After processing, add to response if any skipped
     if skipped_files:
