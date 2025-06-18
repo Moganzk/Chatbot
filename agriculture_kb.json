@@ -1,0 +1,30 @@
+[
+    {
+        "keywords": ["soil quality", "fertile soil"],
+        "response": "To improve soil: 1) Add organic compost 2) Rotate crops 3) Test pH levels"
+    },
+    {
+        "keywords": ["pest control", "insects"],
+        "response": "Natural pest control methods: neem oil, companion planting, and diatomaceous earth"
+    },
+    {
+        "keywords": ["crop rotation", "planting schedule"],
+        "response": "Crop rotation helps prevent soil depletion and pest buildup. Rotate crops every season."
+    },
+    {
+        "keywords": ["irrigation", "watering plants"],
+        "response": "Efficient irrigation methods include drip irrigation, rainwater harvesting, and mulching to retain moisture."
+    },
+    {
+        "keywords": ["fertilizers", "nutrients"],
+        "response": "Use organic fertilizers like compost, manure, or bone meal to enrich soil nutrients."
+    },
+    {
+        "keywords": ["weather", "forecast"],
+        "response": "I can check weather! Please share your location."
+    },
+    {
+        "keywords": ["manual", "guide", "instructions"],
+        "response": "I have PDF manuals available. Ask about: soil, pests, or crops."
+    }
+]

@@ -68,8 +68,10 @@
     }
 
     .bot {
-      background: #333;
+      background: #222;
       color: #00ffe1;
+      margin-bottom: 12px;
+      border-left: 4px solid #00ffe1;
       align-self: flex-start;
     }
 
@@ -110,12 +112,14 @@
     <div class="input-container">
       <input type="text" id="user-input" placeholder="Type something dumb..." />
       <button onclick="sendMessage()">Send</button>
+      <input type="file" id="voice-input" accept="audio/*">
     </div>
   </div>
 
   <script>
     const chatBox = document.getElementById('chat-box');
     const input = document.getElementById('user-input');
+    const voiceInput = document.getElementById('voice-input');
 
     function appendMessage(message, sender) {
       const msg = document.createElement('div');
@@ -127,30 +131,70 @@
 
     function sendMessage() {
       const text = input.value.trim();
-      if (!text) return;
-      
-      appendMessage("You: " + text, 'user');
-      input.value = '';
+      const file = voiceInput.files[0];
+      if (!text && !file) return;
 
-      // Updated fetch call to match Flask backend
+      appendMessage("You: " + (text || "[voice message]"), 'user');
+      input.value = '';
+      voiceInput.value = '';
+
+      let formData = new FormData();
+      if (text) formData.append("msg", text);
+      if (file) formData.append("voice", file);
+
       fetch("/get", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: "msg=" + encodeURIComponent(text),
+        body: formData,
       })
-      .then(response => {
-        if (!response.ok) throw new Error("Network error");
-        return response.json();
-      })
-      .then(data => {
-        appendMessage("Bot: " + data.response, 'bot');
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        appendMessage("Bot: My brain disconnected 😵‍💫", 'bot');
-      });
+        .then(response => {
+          if (!response.ok) throw new Error("Network error");
+          return response.json();
+        })
+        .then(data => {
+          // Weather display
+          if (data.type === "weather") {
+            showWeatherCard(data.response);
+            return;
+          }
+
+          // Manuals display
+          if (data.type === "manuals") {
+            data.manuals.forEach(manual => {
+              addManualCard(manual.title || "Manual", manual.preview || "", manual.url || "#");
+            });
+            return;
+          }
+
+          // Default: text response
+          appendMessage("Bot: " + data.response, 'bot');
+          if (data.audio) {
+            new Audio(data.audio).play();
+          }
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          appendMessage("Bot: My brain disconnected 😵‍💫", 'bot');
+        });
+    }
+
+    function showWeatherCard(weatherText) {
+      const card = document.createElement('div');
+      card.className = 'message bot';
+      card.innerHTML = `<strong>Weather:</strong> ${weatherText}`;
+      chatBox.appendChild(card);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function addManualCard(title, preview, url) {
+      const card = document.createElement('div');
+      card.className = 'message bot';
+      card.innerHTML = `
+        <strong>${title || "Manual"}</strong><br>
+        <em>${preview || ""}</em><br>
+        <a href="${url || "#"}" target="_blank">Download Manual</a>
+      `;
+      chatBox.appendChild(card);
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
 
     // Enter key support
@@ -158,6 +202,9 @@
       if (e.key === "Enter") {
         sendMessage();
       }
+    });
+    voiceInput.addEventListener("change", function () {
+      sendMessage();
     });
   </script>
 </body>

@@ -1,0 +1,5 @@
+[
+    {"name": "Maize", "price": 0.45, "region": "Global"},
+    {"name": "Wheat", "price": 0.62, "region": "North America"},
+    {"name": "Rice", "price": 0.38, "region": "Asia"}
+]

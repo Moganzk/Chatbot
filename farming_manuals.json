@@ -1,0 +1,14 @@
+[
+    {
+        "id": "soil_guide",
+        "title": "Soil Management Guide",
+        "keywords": ["soil", "compost", "fertilizer"],
+        "path": "manuals/soil_guide.pdf"
+    },
+    {
+        "id": "pest_control",
+        "title": "Organic Pest Control",
+        "keywords": ["pests", "insects", "spray"],
+        "path": "manuals/pest_control.pdf"
+    }
+]
