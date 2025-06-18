@@ -120,7 +120,7 @@
     function appendMessage(message, sender) {
       const msg = document.createElement('div');
       msg.className = `message ${sender}`;
-      msg.innerHTML = message; // Use innerHTML to allow links
+      msg.innerHTML = message;
       chatBox.appendChild(msg);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
@@ -128,10 +128,11 @@
     function sendMessage() {
       const text = input.value.trim();
       if (!text) return;
+      
       appendMessage("You: " + text, 'user');
       input.value = '';
 
-      // Send the message to the Flask backend
+      // Updated fetch call to match Flask backend
       fetch("/get", {
         method: "POST",
         headers: {
@@ -139,15 +140,20 @@
         },
         body: "msg=" + encodeURIComponent(text),
       })
-        .then((response) => response.json())
-        .then((data) => {
-          appendMessage("Bot: " + data.response, 'bot');
-        })
-        .catch(() => {
-          appendMessage("Bot: Sorry, I couldn't reach my brain server.", 'bot');
-        });
+      .then(response => {
+        if (!response.ok) throw new Error("Network error");
+        return response.json();
+      })
+      .then(data => {
+        appendMessage("Bot: " + data.response, 'bot');
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        appendMessage("Bot: My brain disconnected 😵‍💫", 'bot');
+      });
     }
 
+    // Enter key support
     input.addEventListener("keypress", function (e) {
       if (e.key === "Enter") {
         sendMessage();

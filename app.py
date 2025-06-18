@@ -1,71 +1,68 @@
-import os
-import datetime
-import re
 from flask import Flask, render_template, request, jsonify
+import requests
+import os
+import json
+import random
 from dotenv import load_dotenv
-import openai
 
+# Load environment variables
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = Flask(__name__)
 
-def handle_local_tasks(user_input):
-    # Example: tell the time
-    if "time" in user_input.lower():
-        now = datetime.datetime.now().strftime("%H:%M")
-        return f"The current time is {now}."
-    # Math solver
-    match = re.search(r'(\d+)\s*([\+\-\*/])\s*(\d+)', user_input)
-    if match:
-        a, op, b = match.groups()
-        a, b = float(a), float(b)
-        if op == '+':
-            return f"{a} + {b} = {a + b}"
-        elif op == '-':
-            return f"{a} - {b} = {a - b}"
-        elif op == '*':
-            return f"{a} * {b} = {a * b}"
-        elif op == '/':
-            return f"{a} / {b} = {a / b if b != 0 else 'undefined (division by zero)'}"
+# Load local intents
+with open('intents.json') as f:
+    intents = json.load(f)
+
+def get_local_response(user_message):
+    """Check if message matches any local intent patterns"""
+    for intent in intents['intents']:
+        if any(user_message.lower() == pattern.lower() for pattern in intent['patterns']):
+            return random.choice(intent['responses'])
     return None
 
-def get_response(user_input):
-    # First, check for local tasks
-    local_response = handle_local_tasks(user_input)
-    if local_response:
-        return local_response
-
-    # If user wants to google/search, return a Google link
-    if "google" in user_input.lower() or "search" in user_input.lower():
-        return f"🔍 <a href='https://www.google.com/search?q={user_input.replace(' ', '+')}' target='_blank'>Search on Google</a>"
-
-    # Otherwise, use OpenAI for a smart response
-    try:
-        completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are Mogan, a helpful, witty assistant."},
-                {"role": "user", "content": user_input}
-            ],
-            max_tokens=100,
-            temperature=0.7,
-        )
-        return completion.choices[0].message.content.strip()
-    except Exception as e:
-        print("OpenAI error:", e)
-        return "Sorry, I couldn't reach my brain server."
-
-@app.route("/")
+@app.route('/')
 def home():
-    return render_template("index.html")
+    return render_template('index.html')
 
-@app.route("/get", methods=["POST"])
-def chat():
-    user_input = request.form["msg"]
-    bot_response = get_response(user_input)
-    return jsonify({"response": bot_response})
+@app.route('/get', methods=['POST'])
+def get_bot_response():
+    user_message = request.form.get('msg')
+    if not user_message:
+        return jsonify({"response": "You sent an empty message 🤨"})
 
-if __name__ == "__main__":
+    # 1. First try local intents
+    local_reply = get_local_response(user_message)
+    if local_reply:
+        return jsonify({"response": local_reply})
+
+    # 2. Fallback to Groq API
+    try:
+        headers = {
+            "Authorization": f"Bearer {os.getenv('GROQ_API_KEY')}",
+            "Content-Type": "application/json"
+        }
+        data = {
+            "model": "llama3-70b-8192",
+            "messages": [{"role": "user", "content": user_message}],
+            "temperature": 0.7
+        }
+        
+        response = requests.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers=headers,
+            json=data,
+            timeout=10  # 10-second timeout
+        )
+        response.raise_for_status()  # Raise HTTP errors
+        
+        return jsonify({
+            "response": response.json()["choices"][0]["message"]["content"]
+        })
+
+    except requests.exceptions.RequestException as e:
+        error_msg = f"API Error: {str(e)}" if os.getenv('FLASK_ENV') == 'development' else "My brain crashed 💀"
+        return jsonify({"response": error_msg})
+
+if __name__ == '__main__':
     app.run(debug=True)
-
