@@ -1,25 +1,14 @@
 import os
-import json
-import random
-import pickle
-import numpy as np
+import datetime
+import re
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 import openai
-import datetime
-import re
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = Flask(__name__)
-
-# Load intents and model for fallback/local tasks
-with open('intents.json') as f:
-    intents = json.load(f)
-
-with open('chatbot_model.pkl', 'rb') as f:
-    model = pickle.load(f)
 
 def handle_local_tasks(user_input):
     # Example: tell the time
@@ -64,17 +53,8 @@ def get_response(user_input):
         )
         return completion.choices[0].message.content.strip()
     except Exception as e:
-        print("OpenAI error:", e)  # Add this line
-        # Fallback to classic intent-based response if OpenAI fails
-        predicted_proba = model.predict_proba([user_input])[0]
-        max_proba = np.max(predicted_proba)
-        intent_tag = model.classes_[np.argmax(predicted_proba)]
-        if max_proba < 0.2:
-            return "Sorry, I don't understand. Can you rephrase?"
-        for intent in intents['intents']:
-            if intent['tag'] == intent_tag:
-                return random.choice(intent['responses'])
-        return "uhh... what?"
+        print("OpenAI error:", e)
+        return "Sorry, I couldn't reach my brain server."
 
 @app.route("/")
 def home():
