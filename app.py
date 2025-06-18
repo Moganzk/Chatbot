@@ -330,6 +330,21 @@ def set_language():
     session['language'] = request.json.get('lang', 'en')
     return jsonify({"status": "success"})
 
+@app.route('/feedback', methods=['POST'])
+def feedback():
+    data = request.json
+    feedback = data.get('feedback')
+    msg_id = data.get('msg_id')
+    # Save feedback to a file (or database)
+    with open('feedback_log.jsonl', 'a') as f:
+        f.write(json.dumps({
+            "timestamp": datetime.utcnow().isoformat(),
+            "feedback": feedback,
+            "msg_id": msg_id,
+            "session": session.get('conversation', [])
+        }) + "\n")
+    return jsonify({"status": "ok"})
+
 # =====================
 # UTILITIES
 # =====================

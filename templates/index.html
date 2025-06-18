@@ -333,6 +333,14 @@
       filePreview.innerHTML = '';
     }
 
+    function sendFeedback(feedback, msg_id) {
+      fetch("https://chatbot-i34n.onrender.com/feedback", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({feedback, msg_id})
+      });
+    }
+
     // Drag and drop functionality
     ['dragenter', 'dragover'].forEach(eventName => {
       dropArea.addEventListener(eventName, (e) => {
