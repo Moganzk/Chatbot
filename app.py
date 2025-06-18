@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, session, send_file
+from flask_cors import CORS
 import requests
 import os
 import json
@@ -26,6 +27,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY')
 app.permanent_session_lifetime = timedelta(hours=2)
+CORS(app)
 
 # =====================
 # KNOWLEDGE BASES
