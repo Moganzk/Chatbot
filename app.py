@@ -13,6 +13,13 @@ import io
 import PyPDF2
 from io import BytesIO
 import pytemperature  # For weather conversions
+import docx
+from pptx import Presentation
+import csv
+import openai
+from PIL import Image
+import base64
+import pytesseract
 
 # Initialize app
 load_dotenv()
@@ -144,6 +151,27 @@ def text_to_speech(text, lang='en'):
         print(f"TTS error: {e}")
         return None
 
+# 9. IMAGE ANALYSIS (OpenAI Vision API)
+def analyze_image(file_storage):
+    # Convert image to base64
+    image = Image.open(file_storage)
+    buffered = io.BytesIO()
+    image.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode()
+    # Call OpenAI Vision API (GPT-4o)
+    response = openai.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant that analyzes images and answers questions about them."},
+            {"role": "user", "content": [
+                {"type": "text", "text": "Describe this image and answer any question about it."},
+                {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{img_str}"}}
+            ]}
+        ],
+        max_tokens=400
+    )
+    return response.choices[0].message.content
+
 # =====================
 # ROUTES
 # =====================
@@ -157,16 +185,88 @@ def home():
 
 @app.route('/get', methods=['POST'])
 def chat():
-    # Get input
     user_input = request.form.get('msg', "").strip()
-    voice_file = request.files.get('voice')
+    # Collect all audio and document files
+    audio_files = [f for k, f in request.files.items() if k.startswith('voice')]
+    doc_files = [f for k, f in request.files.items() if k.startswith('document')]
     location = request.form.get('location', "")
     crop_query = request.form.get('crop', "")
-    
-    # Process voice
-    if voice_file and not user_input:
-        user_input = process_voice(voice_file) or ""
-    
+
+    # Process all audio files (concatenate recognized text)
+    for audio_file in audio_files:
+        voice_text = process_voice(audio_file)
+        if voice_text:
+            user_input += " " + voice_text
+
+    skipped_files = []
+    # Process all document files (concatenate extracted text)
+    for doc_file in doc_files:
+        filename = doc_file.filename.lower()
+        text = ""
+        try:
+            if filename.endswith('.pdf'):
+                pdf = PyPDF2.PdfReader(doc_file)
+                for page in pdf.pages:
+                    text += page.extract_text() or ""
+            elif filename.endswith('.txt'):
+                text = doc_file.read().decode('utf-8')
+            elif filename.endswith('.docx'):
+                doc = docx.Document(doc_file)
+                text = "\n".join([para.text for para in doc.paragraphs])
+            elif filename.endswith('.pptx'):
+                prs = Presentation(doc_file)
+                for slide in prs.slides:
+                    for shape in slide.shapes:
+                        if hasattr(shape, "text"):
+                            text += shape.text + "\n"
+            elif filename.endswith('.html'):
+                text = doc_file.read().decode('utf-8')
+                import re
+                text = re.sub('<[^<]+?>', '', text)
+            elif filename.endswith('.py'):
+                text = doc_file.read().decode('utf-8')
+            elif filename.endswith('.csv'):
+                text = ""
+                decoded = doc_file.read().decode('utf-8')
+                reader = csv.reader(decoded.splitlines())
+                for row in reader:
+                    text += ', '.join(row) + '\n'
+            elif filename.endswith('.json'):
+                import json
+                data = json.load(doc_file)
+                text = json.dumps(data, indent=2)
+            elif filename.endswith('.md'):
+                text = doc_file.read().decode('utf-8')
+            elif filename.endswith(('.js', '.java', '.c', '.cpp')):
+                text = doc_file.read().decode('utf-8')
+            elif filename.endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
+                try:
+                    image = Image.open(doc_file)
+                    ocr_text = pytesseract.image_to_string(image).strip()
+                    if ocr_text:
+                        user_input += " [Extracted from image: " + ocr_text[:500] + "]"
+                    else:
+                        user_input += " Sorry, I can’t analyze images right now, but I can help with text or answer your questions!"
+                except Exception as e:
+                    print(f"OCR error: {e}")
+                    user_input += " Sorry, I can’t analyze images right now, but I can help with text or answer your questions!"
+            else:
+                skipped_files.append(doc_file.filename)
+                continue  # skip unsupported files
+        except Exception as e:
+            print(f"File error: {e}")
+            continue
+        user_input += " " + text[:1000]  # Limit each file's text
+
+    # After processing, add to response if any skipped
+    if skipped_files:
+        skip_msg = f"Note: These files were not processed (unsupported type): {', '.join(skipped_files)}"
+        user_input += " " + skip_msg
+
+    # Limit total input length for LLM
+    MAX_INPUT_LENGTH = 4000
+    user_input = user_input[:MAX_INPUT_LENGTH]
+
     # Detect response style
     style = detect_style(user_input)
     lang = session.get('language', 'en')
@@ -205,16 +305,15 @@ def chat():
         session['conversation'].append({"role": "user", "content": user_input})
         session['conversation'].append({"role": "assistant", "content": local_reply})
         return format_response(local_reply, style, lang)
-    
-    # Groq API call
+
+    # Groq API call (handles open-ended conversation)
     try:
         headers = {"Authorization": f"Bearer {os.getenv('GROQ_API_KEY')}"}
         messages = [
-            {"role": "system", "content": f"Respond in {style} style"},
-            *session['conversation'][-3:],
+            {"role": "system", "content": f"You are Mogan, a helpful, witty assistant. Respond in {style} style."},
+            *session['conversation'][-16:],
             {"role": "user", "content": user_input}
         ]
-        
         response = requests.post(
             "https://api.groq.com/openai/v1/chat/completions",
             headers=headers,
@@ -225,11 +324,9 @@ def chat():
             },
             timeout=10
         )
-        
         bot_reply = response.json()["choices"][0]["message"]["content"]
         session['conversation'].append({"role": "assistant", "content": bot_reply})
         return format_response(bot_reply, style, lang)
-    
     except Exception as e:
         print(f"Groq error: {e}")
         return format_response(STYLES[style]["error"], style, lang)
@@ -251,7 +348,9 @@ def format_response(text, style, lang):
 
 @app.route('/get_manual/<manual_id>')
 def download_manual(manual_id):
-    manual = next(m for m in manuals if m['id'] == manual_id)
+    manual = next((m for m in manuals if m['id'] == manual_id), None)
+    if not manual or not os.path.exists(manual['path']):
+        return "Manual not found.", 404
     return send_file(manual['path'], as_attachment=True)
 
 @app.route('/set_language', methods=['POST'])

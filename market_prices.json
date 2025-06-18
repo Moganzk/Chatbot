@@ -1,5 +1,38 @@
 [
-    {"name": "Maize", "price": 0.45, "region": "Global"},
-    {"name": "Wheat", "price": 0.62, "region": "North America"},
-    {"name": "Rice", "price": 0.38, "region": "Asia"}
+    {
+        "name": "Maize",
+        "price": 0.45,
+        "currency": "USD",
+        "unit": "kg",
+        "region": "Global",
+        "keywords": ["maize", "corn", "maize price", "corn price"],
+        "example_questions": [
+            "What is the price of maize?",
+            "How much does corn cost per kg?"
+        ]
+    },
+    {
+        "name": "Wheat",
+        "price": 0.62,
+        "currency": "USD",
+        "unit": "kg",
+        "region": "North America",
+        "keywords": ["wheat", "wheat price"],
+        "example_questions": [
+            "Current wheat price in North America?",
+            "How much is wheat per kg?"
+        ]
+    },
+    {
+        "name": "Rice",
+        "price": 0.38,
+        "currency": "USD",
+        "unit": "kg",
+        "region": "Asia",
+        "keywords": ["rice", "rice price"],
+        "example_questions": [
+            "What is the price of rice in Asia?",
+            "How much does rice cost?"
+        ]
+    }
 ]

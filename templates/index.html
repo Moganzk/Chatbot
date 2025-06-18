@@ -4,104 +4,173 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mogan Chatbot</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
   <style>
-    * {
+    body {
+      background: #181c1f;
+      color: #fff;
+      font-family: 'Inter', Arial, sans-serif;
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
     }
-
-    body {
-      background: linear-gradient(135deg, #0d0d0d, #1f1f1f);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 40px 20px;
-      color: #fff;
-    }
-
     .chat-container {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
       border-radius: 20px;
       width: 100%;
-      max-width: 600px;
+      max-width: 900px;
+      min-width: 320px;
+      min-height: 600px;
       padding: 30px;
       box-shadow: 0 0 30px rgba(0, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      margin: 40px auto;
     }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 25px;
-      font-size: 1.8rem;
-      color: #00ffe1;
-    }
-
     .chat-box {
-      height: 400px;
+      flex: 1 1 auto;
+      min-height: 300px;
+      max-height: 60vh;
       overflow-y: auto;
       background: rgba(0, 0, 0, 0.2);
       border-radius: 12px;
       padding: 15px;
       margin-bottom: 20px;
       scroll-behavior: smooth;
+      display: flex;
+      flex-direction: column;
     }
-
-    .message {
-      margin-bottom: 12px;
-      padding: 10px 15px;
-      border-radius: 18px;
-      max-width: 80%;
-      line-height: 1.4;
-    }
-
-    .user {
-      background: #007bff;
-      color: white;
-      align-self: flex-end;
-      text-align: right;
-      margin-left: auto;
-    }
-
-    .bot {
-      background: #222;
-      color: #00ffe1;
-      margin-bottom: 12px;
-      border-left: 4px solid #00ffe1;
-      align-self: flex-start;
-    }
-
     .input-container {
       display: flex;
+      align-items: center;
       gap: 10px;
+      margin-top: 10px;
     }
-
-    input[type="text"] {
-      flex: 1;
-      padding: 12px 15px;
-      border-radius: 10px;
+    .input-container input[type="text"] {
+      flex: 1 1 auto;
+      padding: 10px;
+      border-radius: 8px;
       border: none;
-      outline: none;
       font-size: 1rem;
+      background: #23272b;
+      color: #fff;
+      outline: none;
     }
-
-    button {
-      padding: 12px 20px;
-      background-color: #00ffe1;
-      color: #000;
+    .input-container button {
+      padding: 10px 18px;
+      border-radius: 8px;
       border: none;
-      border-radius: 10px;
-      cursor: pointer;
+      background: #00ffe1;
+      color: #181c1f;
       font-weight: bold;
-      transition: background 0.3s ease;
+      cursor: pointer;
+      transition: background 0.2s;
     }
-
-    button:hover {
-      background-color: #00bfa6;
+    .input-container button:hover {
+      background: #00bfae;
+    }
+    .audio-label, .file-label {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      margin: 0 4px;
+    }
+    .audio-label svg, .file-label svg {
+      transition: fill 0.2s;
+    }
+    .audio-label:hover svg, .file-label:hover svg {
+      fill: #00bfae;
+    }
+    .message {
+      margin: 8px 0;
+      padding: 10px 16px;
+      border-radius: 12px;
+      max-width: 80%;
+      word-break: break-word;
+    }
+    .message.user {
+      background: #007bff;
+      color: #fff;
+      align-self: flex-end;
+      text-align: right;
+    }
+    .message.bot {
+      background: #23272b;
+      color: #00ffe1;
+      align-self: flex-start;
+      text-align: left;
+    }
+    #file-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .file-preview-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 0.95em;
+      background: rgba(0,0,0,0.12);
+      border-radius: 8px;
+      padding: 4px 8px;
+    }
+    .file-preview-item img {
+      max-height: 60px;
+      max-width: 80px;
+      border-radius: 6px;
+      margin-bottom: 4px;
+    }
+    .remove-btn {
+      background: none;
+      border: none;
+      color: #ff4d4d;
+      font-size: 1.2em;
+      cursor: pointer;
+      margin-left: 4px;
+    }
+    @media (max-width: 900px) {
+      .chat-container {
+        max-width: 98vw;
+        min-width: 0;
+        padding: 10px;
+      }
+      .chat-box {
+        max-height: 50vh;
+      }
+    }
+    @media (max-width: 600px) {
+      .chat-container {
+        padding: 5px;
+        border-radius: 10px;
+      }
+      .chat-box {
+        padding: 5px;
+        font-size: 0.95rem;
+      }
+      .input-container {
+        flex-direction: column;
+        gap: 5px;
+      }
+      button, input[type="text"] {
+        font-size: 1rem;
+        width: 100%;
+      }
+    }
+    #drop-area {
+      border:2px dashed #00ffe1;
+      border-radius:8px;
+      padding:10px;
+      text-align:center;
+      margin-bottom:10px;
+      display:none;
+      color: #00ffe1;
+      background: rgba(0,255,255,0.03);
+      transition: background 0.2s;
+    }
+    #drop-area.active {
+      background: #222;
     }
   </style>
 </head>
@@ -109,17 +178,37 @@
   <div class="chat-container">
     <h1>Talk to Mogan 🤖</h1>
     <div class="chat-box" id="chat-box"></div>
+    <div id="file-preview"></div>
+    <div id="drop-area">Drag & drop files here</div>
     <div class="input-container">
-      <input type="text" id="user-input" placeholder="Type something dumb..." />
+      <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off" />
+      <!-- Audio (microphone) button -->
+      <label for="audio-input" class="audio-label" title="Send audio">
+        <svg width="24" height="24" fill="#00ffe1" viewBox="0 0 24 24">
+          <path d="M12 3a4 4 0 0 1 4 4v5a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4zm-7 8a1 1 0 0 1 2 0v1a7 7 0 0 0 14 0v-1a1 1 0 1 1 2 0v1a9 9 0 0 1-18 0v-1z"/>
+        </svg>
+      </label>
+      <input type="file" id="audio-input" accept="audio/*" style="display:none;" multiple>
+      <!-- File (document) button -->
+      <label for="doc-input" class="file-label" title="Upload document">
+        <svg width="24" height="24" fill="#00ffe1" viewBox="0 0 24 24">
+          <path d="M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6H6zm7 1.5V9h5.5L13 3.5z"/>
+        </svg>
+      </label>
+      <input type="file" id="doc-input" accept=".pdf,.doc,.docx,.txt,.md,.csv,.json,.ppt,.pptx,.py,.js,.java,.c,.cpp,.html,.jpg,.jpeg,.png,.gif,.bmp" style="display:none;" multiple>
       <button onclick="sendMessage()">Send</button>
-      <input type="file" id="voice-input" accept="audio/*">
     </div>
   </div>
-
   <script>
     const chatBox = document.getElementById('chat-box');
     const input = document.getElementById('user-input');
-    const voiceInput = document.getElementById('voice-input');
+    const audioInput = document.getElementById('audio-input');
+    const docInput = document.getElementById('doc-input');
+    const filePreview = document.getElementById('file-preview');
+    const dropArea = document.getElementById('drop-area');
+
+    let selectedAudioFiles = [];
+    let selectedDocFiles = [];
 
     function appendMessage(message, sender) {
       const msg = document.createElement('div');
@@ -129,82 +218,146 @@
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
+    function getFileIcon(filename) {
+      const ext = filename.split('.').pop().toLowerCase();
+      if (['pdf'].includes(ext)) return "📄";
+      if (['doc', 'docx'].includes(ext)) return "📝";
+      if (['ppt', 'pptx'].includes(ext)) return "📊";
+      if (['txt', 'md'].includes(ext)) return "📃";
+      if (['csv', 'json'].includes(ext)) return "🗂️";
+      if (['py', 'js', 'java', 'c', 'cpp', 'html'].includes(ext)) return "💻";
+      if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(ext)) return "🖼️";
+      if (['mp3', 'wav', 'ogg', 'm4a'].includes(ext)) return "🎵";
+      if (['mp4', 'mov', 'avi'].includes(ext)) return "🎬";
+      return "📁";
+    }
+
+    function updateFilePreview() {
+      filePreview.innerHTML = "";
+      const files = [...selectedAudioFiles, ...selectedDocFiles];
+      files.forEach((file, idx) => {
+        const ext = file.name.split('.').pop().toLowerCase();
+        const item = document.createElement('div');
+        item.className = "file-preview-item";
+        if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(ext)) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            item.innerHTML = `<img src="${e.target.result}" alt="${file.name}">
+              <span>${file.name}</span>
+              <button class="remove-btn" onclick="removeFile(${idx})" aria-label="Remove file">❌</button>`;
+          };
+          reader.readAsDataURL(file);
+        } else {
+          item.innerHTML = `<span style="font-size:2em">${getFileIcon(file.name)}</span>
+            <span>${file.name}</span>
+            <button class="remove-btn" onclick="removeFile(${idx})" aria-label="Remove file">❌</button>`;
+        }
+        filePreview.appendChild(item);
+      });
+    }
+
+    function removeFile(idx) {
+      if (idx < selectedAudioFiles.length) {
+        selectedAudioFiles.splice(idx, 1);
+      } else {
+        selectedDocFiles.splice(idx - selectedAudioFiles.length, 1);
+      }
+      updateFilePreview();
+    }
+
+    audioInput.addEventListener('change', function() {
+      selectedAudioFiles = Array.from(audioInput.files);
+      updateFilePreview();
+    });
+    docInput.addEventListener('change', function() {
+      selectedDocFiles = Array.from(docInput.files);
+      updateFilePreview();
+    });
+
     function sendMessage() {
       const text = input.value.trim();
-      const file = voiceInput.files[0];
-      if (!text && !file) return;
+      if (!text && selectedAudioFiles.length === 0 && selectedDocFiles.length === 0) return;
 
-      appendMessage("You: " + (text || "[voice message]"), 'user');
-      input.value = '';
-      voiceInput.value = '';
+      if (text) appendMessage("You: " + text, 'user');
 
-      let formData = new FormData();
+      // Show attached images in chat
+      selectedDocFiles.forEach(file => {
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(ext)) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            appendMessage(`<img src="${e.target.result}" alt="${file.name}" style="max-width:180px;max-height:120px;border-radius:8px;display:block;margin:6px 0;">`, 'user');
+          };
+          reader.readAsDataURL(file);
+        } else {
+          appendMessage("You attached a document: " + file.name, 'user');
+        }
+      });
+
+      selectedAudioFiles.forEach(file => appendMessage("You attached an audio file: " + file.name, 'user'));
+
+      const formData = new FormData();
       if (text) formData.append("msg", text);
-      if (file) formData.append("voice", file);
+      selectedAudioFiles.forEach((file, i) => formData.append("voice" + i, file));
+      selectedDocFiles.forEach((file, i) => formData.append("document" + i, file));
 
       fetch("/get", {
         method: "POST",
         body: formData,
       })
-        .then(response => {
-          if (!response.ok) throw new Error("Network error");
-          return response.json();
-        })
-        .then(data => {
-          // Weather display
-          if (data.type === "weather") {
-            showWeatherCard(data.response);
-            return;
-          }
-
-          // Manuals display
-          if (data.type === "manuals") {
-            data.manuals.forEach(manual => {
-              addManualCard(manual.title || "Manual", manual.preview || "", manual.url || "#");
-            });
-            return;
-          }
-
-          // Default: text response
-          appendMessage("Bot: " + data.response, 'bot');
-          if (data.audio) {
-            new Audio(data.audio).play();
+        .then((response) => response.json())
+        .then((data) => {
+          appendMessage("Mogan: " + data.response, 'bot');
+          if (data.audioUrl) {
+            new Audio(data.audioUrl).play();
           }
         })
-        .catch(error => {
-          console.error("Error:", error);
-          appendMessage("Bot: My brain disconnected 😵‍💫", 'bot');
+        .catch(() => {
+          appendMessage("Mogan: Sorry, I couldn't process your request.", 'bot');
         });
+
+      input.value = '';
+      audioInput.value = '';
+      docInput.value = '';
+      selectedAudioFiles = [];
+      selectedDocFiles = [];
+      filePreview.innerHTML = '';
     }
 
-    function showWeatherCard(weatherText) {
-      const card = document.createElement('div');
-      card.className = 'message bot';
-      card.innerHTML = `<strong>Weather:</strong> ${weatherText}`;
-      chatBox.appendChild(card);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
+    // Drag and drop functionality
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropArea.classList.add('active');
+      }, false);
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('active');
+      }, false);
+    });
+    dropArea.addEventListener('drop', (e) => {
+      const files = Array.from(e.dataTransfer.files);
+      files.forEach(file => {
+        if (file.type.startsWith('audio/')) {
+          selectedAudioFiles.push(file);
+        } else {
+          selectedDocFiles.push(file);
+        }
+      });
+      updateFilePreview();
+    });
 
-    function addManualCard(title, preview, url) {
-      const card = document.createElement('div');
-      card.className = 'message bot';
-      card.innerHTML = `
-        <strong>${title || "Manual"}</strong><br>
-        <em>${preview || ""}</em><br>
-        <a href="${url || "#"}" target="_blank">Download Manual</a>
-      `;
-      chatBox.appendChild(card);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
+    // Show drop area on focus
+    input.addEventListener('focus', () => { dropArea.style.display = 'block'; });
+    input.addEventListener('blur', () => { dropArea.style.display = 'none'; });
 
-    // Enter key support
+    // Send message on Enter key
     input.addEventListener("keypress", function (e) {
       if (e.key === "Enter") {
         sendMessage();
       }
-    });
-    voiceInput.addEventListener("change", function () {
-      sendMessage();
     });
   </script>
 </body>
