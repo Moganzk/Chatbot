@@ -310,7 +310,7 @@
       selectedAudioFiles.forEach((file, i) => formData.append("voice" + i, file));
       selectedDocFiles.forEach((file, i) => formData.append("document" + i, file));
 
-      fetch("/get", {
+      fetch("https://chatbot-i34n.onrender.com/get", {
         method: "POST",
         body: formData,
       })
