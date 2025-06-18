@@ -6,7 +6,7 @@ import json
 import random
 from dotenv import load_dotenv
 from datetime import timedelta, datetime
-from googletrans import Translator
+#from googletrans import Translator
 import speech_recognition as sr
 from gtts import gTTS
 import pygame
