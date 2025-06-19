@@ -48,7 +48,7 @@ with open('market_prices.json') as f:  # New: Crop prices
 # =====================
 # SERVICE INITIALIZATION
 # =====================
-translator = Translator()
+#translator = Translator()
 recognizer = sr.Recognizer()
 pygame.mixer.init()
 
@@ -137,10 +137,7 @@ def process_voice(audio_file):
 
 # 7. TRANSLATION SYSTEM
 def translate_text(text, target_lang='en'):
-    try:
-        return translator.translate(text, dest=target_lang).text
-    except:
-        return text
+    return text
 
 # 8. TEXT-TO-SPEECH
 def text_to_speech(text, lang='en'):

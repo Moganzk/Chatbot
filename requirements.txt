@@ -3,4 +3,3 @@ python-dotenv
 flask-cors
 requests
 gunicorn
-googletrans==4.0.0-rc1
