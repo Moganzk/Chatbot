@@ -49,7 +49,10 @@ with open('market_prices.json') as f:  # New: Crop prices
 # =====================
 
 recognizer = sr.Recognizer()
-pygame.mixer.init()
+try:
+    pygame.mixer.init()
+except Exception as e:
+    print("Audio init failed (likely no audio device on server):", e)
 
 # =====================
 # CORE FUNCTIONALITIES
