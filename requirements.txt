@@ -3,3 +3,11 @@ python-dotenv
 flask-cors
 requests
 gunicorn
+SpeechRecognition
+pygame
+gTTS
+PyPDF2
+pytesseract
+python-docx
+python-pptx
+Pillow
