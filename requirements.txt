@@ -11,3 +11,5 @@ pytesseract
 python-docx
 python-pptx
 Pillow
+pytemperature
+openai
