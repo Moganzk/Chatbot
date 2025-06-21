@@ -6,7 +6,6 @@ import json
 import random
 from dotenv import load_dotenv
 from datetime import timedelta, datetime
-from googletrans import Translator
 import speech_recognition as sr
 from gtts import gTTS
 import pygame
@@ -48,7 +47,7 @@ with open('market_prices.json') as f:  # New: Crop prices
 # =====================
 # SERVICE INITIALIZATION
 # =====================
-#translator = Translator()
+
 recognizer = sr.Recognizer()
 pygame.mixer.init()
 
