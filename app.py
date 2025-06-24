@@ -1,7 +1,9 @@
+import os
+os.environ['SDL_AUDIODRIVER'] = 'dummy'
+
 from flask import Flask, render_template, request, jsonify, session, send_file
 from flask_cors import CORS
 import requests
-import os
 import json
 import random
 from dotenv import load_dotenv
