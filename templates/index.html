@@ -2,54 +2,144 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Mogan Chatbot</title>
   <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/000000/bot.png">
   <style>
-    body {
-      background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
-      min-height: 100vh;
+    :root {
+      --bg-gradient-start: #e0e7ff;
+      --bg-gradient-end: #f8fafc;
+      --chat-bg: #fff;
+      --header-bg: #e0e7ff;
+      --header-color: #5b21b6;
+      --chat-area-bg: #f8fafc;
+      --user-bubble-bg: #d1fae5;
+      --user-bubble-color: #065f46;
+      --bot-bubble-bg: #e0e7ff;
+      --bot-bubble-color: #3730a3;
+      --input-bg: #fff;
+      --input-border: #e0e7ff;
+      --input-focus-border: #a5b4fc;
+      --button-bg: #6366f1;
+      --button-hover: #4338ca;
+      --button-color: #fff;
+      --timestamp-color: #a1a1aa;
+      --file-preview-bg: #f3f4f6;
+      --theme-toggle-bg: #e0e7ff;
+    }
+
+    [data-theme="dark"] {
+      --bg-gradient-start: #1e1b4b;
+      --bg-gradient-end: #0f172a;
+      --chat-bg: #1e293b;
+      --header-bg: #1e1b4b;
+      --header-color: #c7d2fe;
+      --chat-area-bg: #0f172a;
+      --user-bubble-bg: #065f46;
+      --user-bubble-color: #d1fae5;
+      --bot-bubble-bg: #1e1b4b;
+      --bot-bubble-color: #c7d2fe;
+      --input-bg: #1e293b;
+      --input-border: #334155;
+      --input-focus-border: #6366f1;
+      --button-bg: #6366f1;
+      --button-hover: #818cf8;
+      --button-color: #fff;
+      --timestamp-color: #64748b;
+      --file-preview-bg: #334155;
+      --theme-toggle-bg: #1e1b4b;
+    }
+
+    * {
+      box-sizing: border-box;
       margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
       font-family: 'Inter', Arial, sans-serif;
+      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+      transition: background 0.3s ease;
+      touch-action: manipulation;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      max-height: 100%;
+      background: var(--chat-bg);
+      margin: 0 auto;
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+      transition: background 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: var(--header-bg);
+      color: var(--header-color);
+      font-size: 1.2em;
+      font-weight: bold;
+      text-align: center;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--header-bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+    }
+
+    .theme-toggle {
+      background: var(--theme-toggle-bg);
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: absolute;
+      right: 15px;
     }
-    .chat-container {
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
-      width: 100%;
-      max-width: 420px;
-      min-width: 0;
-      height: 90vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      margin: 24px 0;
-      border: 1px solid #e0e7ff;
-      position: relative;
-    }
-    .chat-header {
-      background: #e0e7ff;
-      color: #5b21b6;
-      font-size: 1.3em;
-      font-weight: bold;
-      text-align: center;
-      padding: 18px 0 12px 0;
-      letter-spacing: 1px;
-      border-bottom: 1px solid #e0e7ff;
-    }
+
     .chat-box {
-      flex: 1 1 auto;
+      flex: 1;
       overflow-y: auto;
-      background: #f8fafc;
-      padding: 18px 10px 18px 10px;
+      -webkit-overflow-scrolling: touch;
+      background: var(--chat-area-bg);
+      padding: 18px 10px;
       display: flex;
       flex-direction: column;
       gap: 14px;
       scroll-behavior: smooth;
+      transition: background 0.3s ease;
+      min-height: 0;
+      overscroll-behavior: contain;
     }
+
     .message-row {
       display: flex;
       align-items: flex-end;
@@ -57,17 +147,20 @@
       margin-bottom: 2px;
       animation: bubbleIn 0.25s;
     }
+
     .message-row.user {
       justify-content: flex-end;
     }
+
     .message-row.bot {
       justify-content: flex-start;
     }
+
     .avatar {
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background: #e0e7ff;
+      background: var(--bot-bubble-bg);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -76,16 +169,19 @@
       margin-bottom: 2px;
       flex-shrink: 0;
     }
+
     .avatar.user {
-      background: #c7d2fe;
+      background: var(--user-bubble-bg);
       color: #2563eb;
     }
+
     .avatar.bot {
       background: #fef9c3;
       color: #f59e42;
     }
+
     .bubble {
-      max-width: 70vw;
+      max-width: 70%;
       padding: 13px 18px;
       font-size: 1.08em;
       border-radius: 18px;
@@ -96,91 +192,84 @@
       display: flex;
       flex-direction: column;
       gap: 2px;
-      animation: bubbleIn 0.25s;
     }
+
     .bubble.user {
-      background: #d1fae5;
-      color: #065f46;
+      background: var(--user-bubble-bg);
+      color: var(--user-bubble-color);
       border-bottom-right-radius: 6px;
-      align-self: flex-end;
     }
+
     .bubble.bot {
-      background: #e0e7ff;
-      color: #3730a3;
+      background: var(--bot-bubble-bg);
+      color: var(--bot-bubble-color);
       border-bottom-left-radius: 6px;
-      align-self: flex-start;
     }
+
     .timestamp {
       font-size: 0.75em;
-      color: #a1a1aa;
+      color: var(--timestamp-color);
       align-self: flex-end;
       margin-top: 2px;
       margin-bottom: -4px;
     }
-    .input-container {
-      position: sticky;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #fff;
+
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 13px 18px;
+      background: var(--bot-bubble-bg);
+      color: var(--bot-bubble-color);
+      border-radius: 18px;
+      border-bottom-left-radius: 6px;
+      max-width: 70%;
+      box-shadow: 0 2px 8px rgba(91,33,182,0.06);
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--bot-bubble-color);
+      border-radius: 50%;
+      opacity: 0.4;
+      animation: typingAnimation 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    .input-area {
+      display: flex;
+      flex-direction: column;
+      background: var(--chat-bg);
+      border-top: 1px solid var(--input-border);
       padding: 10px 8px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border-top: 1px solid #e0e7ff;
-      box-shadow: 0 -2px 16px rgba(31,38,135,0.04);
-      z-index: 10;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
     }
-    .input-container input[type="text"] {
-      flex: 1 1 auto;
-      padding: 13px 14px;
-      border-radius: 10px;
-      border: 1px solid #e0e7ff;
-      font-size: 1em;
-      background: #f8fafc;
-      color: #1e293b;
-      outline: none;
-      transition: border 0.2s;
-    }
-    .input-container input[type="text"]:focus {
-      border: 1.5px solid #a5b4fc;
-      background: #fff;
-    }
-    .input-container button {
-      padding: 12px 20px;
-      border-radius: 10px;
-      border: none;
-      background: #6366f1;
-      color: #fff;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 1.1em;
-      box-shadow: 0 2px 8px rgba(99,102,241,0.08);
-      transition: background 0.2s;
-    }
-    .input-container button:hover {
-      background: #4338ca;
-    }
-    .audio-label, .file-label {
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      margin: 0 4px;
-    }
-    .audio-label svg, .file-label svg {
-      transition: fill 0.2s;
-    }
-    .audio-label:hover svg, .file-label:hover svg {
-      fill: #6366f1;
-    }
+
     #file-preview {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
       padding: 0 10px 6px 10px;
+      max-height: 100px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
+
     .file-preview-item {
-      background: #f3f4f6;
+      background: var(--file-preview-bg);
       border-radius: 8px;
       padding: 4px 8px;
       display: flex;
@@ -189,12 +278,71 @@
       font-size: 0.98em;
       box-shadow: 0 1px 4px rgba(0,0,0,0.04);
     }
-    .file-preview-item img {
-      max-width: 36px;
-      max-height: 36px;
-      border-radius: 6px;
-      margin-right: 4px;
+
+    .input-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      box-sizing: border-box;
     }
+
+    .input-container input[type="text"] {
+      flex: 1 1 0%;
+      min-width: 0;
+      padding: 13px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--input-border);
+      font-size: 1em;
+      background: var(--input-bg);
+      color: var(--bot-bubble-color);
+      outline: none;
+      transition: all 0.3s ease;
+      boxing: border-box;
+    }
+
+    .input-container input[type="text"]:focus {
+      border: 1.5px solid var(--input-focus-border);
+    }
+
+    .input-container button {
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: none;
+      background: var(--button-bg);
+      color: var(--button-color);
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1.1em;
+      box-shadow: 0 2px 8px rgba(99,102,241,0.08);
+      transition: all 0.3s ease;
+      margin-left: 0;
+      min-width: 64px;
+      max-width: 100px;
+      flex-shrink: 0;
+    }
+
+    .input-container button:hover {
+      background: var(--button-hover);
+    }
+
+    .audio-label, .file-label {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      margin: 0 4px;
+      flex-shrink: 0;
+    }
+
+    .audio-label svg, .file-label svg {
+      transition: fill 0.2s;
+      fill: var(--button-bg);
+    }
+
+    .audio-label:hover svg, .file-label:hover svg {
+      fill: var(--button-hover);
+    }
+
     .remove-btn {
       background: none;
       border: none;
@@ -203,65 +351,122 @@
       cursor: pointer;
       margin-left: 4px;
     }
-    #drop-area {
-      display: none;
+
+    @keyframes bubbleIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
     }
+
+    @keyframes typingAnimation {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-5px); opacity: 1; }
+    }
+
+    /* Mobile-specific styles */
     @media (max-width: 600px) {
-      .chat-container {
-        max-width: 100vw;
-        height: 100vh;
-        border-radius: 0;
-        margin: 0;
+      html, body {
+        position: fixed;
+        overflow: hidden;
+        height: 100%;
+        width: 100%;
       }
+
+      .chat-container {
+        border-radius: 0;
+        max-width: 100%;
+        height: 100%;
+      }
+
       .chat-header {
         font-size: 1.1em;
-        padding: 14px 0 8px 0;
+        padding: 14px 0;
+        position: sticky;
+        top: 0;
       }
+
       .chat-box {
-        padding: 10px 2px 10px 2px;
+        padding: 10px 6px;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
       }
+
+      .input-area {
+        padding: 8px 4px;
+      }
+
       .input-container {
-        padding: 8px 2px 8px 2px;
+        gap: 6px;
+        padding: 0;
+        width: 100%;
       }
-      .bubble {
+
+      .input-container input[type="text"] {
+        padding: 10px 10px;
         font-size: 1em;
-        padding: 10px 12px;
       }
+
+      .input-container button {
+        padding: 10px 12px;
+        font-size: 1em;
+        min-width: 48px;
+        max-width: 80px;
+      }
+
+      .bubble {
+        max-width: 85%;
+        font-size: 1em;
+        padding: 10px 14px;
+      }
+
       .avatar {
         width: 28px;
         height: 28px;
         font-size: 1em;
       }
-    }
-    @keyframes bubbleIn {
-      from { opacity: 0; transform: translateY(16px);}
-      to { opacity: 1; transform: translateY(0);}
+
+      .input-container input[type="text"] {
+        padding: 10px 12px;
+      }
+
+      .input-container button {
+        padding: 10px 16px;
+        font-size: 1em;
+      }
     }
   </style>
 </head>
 <body>
   <div class="chat-container">
-    <div class="chat-header">Talk to Mogan <span style="font-size:1.2em;">🤖</span></div>
+    <div class="chat-header">
+      Talk to Mogan <span style="font-size:1.2em;">🤖</span>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 3V4M12 20V21M21 12H20M4 12H3M18.364 5.636L17.656 6.344M6.344 17.656L5.636 18.364M18.364 18.364L17.656 17.656M6.344 6.344L5.636 5.636M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
     <div class="chat-box" id="chat-box"></div>
-    <div id="file-preview"></div>
-    <div id="drop-area">Drag & drop files here</div>
-    <div class="input-container">
-      <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off" />
-      <label for="audio-input" class="audio-label" title="Send audio">
-        <svg width="24" height="24" fill="#6366f1" viewBox="0 0 24 24">
-          <path d="M12 3a4 4 0 0 1 4 4v5a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4zm-7 8a1 1 0 0 1 2 0v1a7 7 0 0 0 14 0v-1a1 1 0 1 1 2 0v1a9 9 0 0 1-18 0v-1z"/>
-        </svg>
-      </label>
-      <input type="file" id="audio-input" accept="audio/*" style="display:none;" multiple>
-      <label for="doc-input" class="file-label" title="Upload document">
-        <svg width="24" height="24" fill="#6366f1" viewBox="0 0 24 24">
-          <path d="M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6H6zm7 1.5V9h5.5L13 3.5z"/>
-        </svg>
-      </label>
-      <input type="file" id="doc-input" accept=".pdf,.doc,.docx,.txt,.md,.csv,.json,.ppt,.pptx,.py,.js,.java,.c,.cpp,.html,.jpg,.jpeg,.png,.gif,.bmp" style="display:none;" multiple>
-      <button onclick="sendMessage()">Send</button>
+    <div class="input-area">
+      <div id="file-preview"></div>
+      <div class="input-container">
+        <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off" />
+        <label for="audio-input" class="audio-label" title="Send audio">
+          <svg width="24" height="24" viewBox="0 0 24 24">
+            <path d="M12 3a4 4 0 0 1 4 4v5a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4zm-7 8a1 1 0 0 1 2 0v1a7 7 0 0 0 14 0v-1a1 1 0 1 1 2 0v1a9 9 0 0 1-18 0v-1z"/>
+          </svg>
+        </label>
+        <input type="file" id="audio-input" accept="audio/*" style="display:none;" multiple>
+        <label for="doc-input" class="file-label" title="Upload document">
+          <svg width="24" height="24" viewBox="0 0 24 24">
+            <path d="M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6H6zm7 1.5V9h5.5L13 3.5z"/>
+          </svg>
+        </label>
+        <input type="file" id="doc-input" accept=".pdf,.doc,.docx,.txt,.md,.csv,.json,.ppt,.pptx,.py,.js,.java,.c,.cpp,.html,.jpg,.jpeg,.png,.gif,.bmp" style="display:none;" multiple>
+        <button onclick="sendMessage()">Send</button>
+      </div>
     </div>
   </div>
+
   <script>
     // Choose backend URL based on environment
     const BACKEND_URL =
@@ -274,12 +479,77 @@
     const audioInput = document.getElementById('audio-input');
     const docInput = document.getElementById('doc-input');
     const filePreview = document.getElementById('file-preview');
-    const dropArea = document.getElementById('drop-area');
+    const themeToggle = document.getElementById('theme-toggle');
 
     let selectedAudioFiles = [];
     let selectedDocFiles = [];
+    let isTyping = false;
+
+    // Theme toggle functionality
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon(newTheme);
+    });
+
+    function updateThemeIcon(theme) {
+      const icon = themeToggle.querySelector('svg');
+      if (theme === 'dark') {
+        icon.innerHTML = '<path d="M12 3C12 3 12 5 12 7C8 7 6 9 6 12C6 15 9 18 12 18C15 18 17 16 17 12C17 10 19 9 19 9C17 9 16 10 16 12C16 14 14 16 12 16C10 16 8 14 8 12C8 10 9 8 12 7C12 9 12 3 12 3Z" fill="currentColor"/>';
+      } else {
+        icon.innerHTML = '<path d="M12 3V4M12 20V21M21 12H20M4 12H3M18.364 5.636L17.656 6.344M6.344 17.656L5.636 18.364M18.364 18.364L17.656 17.656M6.344 6.344L5.636 5.636M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+      }
+    }
+
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+
+    function showTypingIndicator() {
+      if (isTyping) return;
+      
+      isTyping = true;
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'message-row bot';
+      
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar bot';
+      avatar.innerHTML = '🤖';
+      
+      const typingBubble = document.createElement('div');
+      typingBubble.className = 'typing-indicator';
+      typingBubble.innerHTML = `
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      `;
+      
+      typingDiv.appendChild(avatar);
+      typingDiv.appendChild(typingBubble);
+      chatBox.appendChild(typingDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      
+      return typingDiv;
+    }
+
+    function hideTypingIndicator(typingElement) {
+      if (!isTyping) return;
+      
+      isTyping = false;
+      if (typingElement && typingElement.parentNode) {
+        typingElement.remove();
+      }
+    }
 
     function appendMessage(message, sender) {
+      // Hide any existing typing indicator
+      const typingElements = document.querySelectorAll('.typing-indicator');
+      typingElements.forEach(el => el.parentNode.remove());
+      isTyping = false;
+
       const row = document.createElement('div');
       row.className = 'message-row ' + sender;
 
@@ -360,6 +630,7 @@
       selectedAudioFiles = Array.from(audioInput.files);
       updateFilePreview();
     });
+
     docInput.addEventListener('change', function() {
       selectedDocFiles = Array.from(docInput.files);
       updateFilePreview();
@@ -369,7 +640,7 @@
       const text = input.value.trim();
       if (!text && selectedAudioFiles.length === 0 && selectedDocFiles.length === 0) return;
 
-      if (text) appendMessage("You: " + text, 'user');
+      if (text) appendMessage(text, 'user');
 
       // Show attached images in chat
       selectedDocFiles.forEach(file => {
@@ -381,11 +652,14 @@
           };
           reader.readAsDataURL(file);
         } else {
-          appendMessage("You attached a document: " + file.name, 'user');
+          appendMessage("Attached: " + file.name, 'user');
         }
       });
 
-      selectedAudioFiles.forEach(file => appendMessage("You attached an audio file: " + file.name, 'user'));
+      selectedAudioFiles.forEach(file => appendMessage("Audio: " + file.name, 'user'));
+
+      // Show typing indicator
+      const typingElement = showTypingIndicator();
 
       const formData = new FormData();
       if (text) formData.append("msg", text);
@@ -398,13 +672,15 @@
       })
         .then((response) => response.json())
         .then((data) => {
-          appendMessage("Mogan: " + data.response, 'bot');
+          hideTypingIndicator(typingElement);
+          appendMessage(data.response, 'bot');
           if (data.audioUrl) {
             new Audio(data.audioUrl).play();
           }
         })
         .catch(() => {
-          appendMessage("Mogan: Sorry, I couldn't process your request.", 'bot');
+          hideTypingIndicator(typingElement);
+          appendMessage("Sorry, I couldn't process your request.", 'bot');
         });
 
       input.value = '';
@@ -415,49 +691,19 @@
       filePreview.innerHTML = '';
     }
 
-    function sendFeedback(feedback, msg_id) {
-      fetch("https://moganspace.live/feedback", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({feedback, msg_id})
-      });
-    }
-
-    // Drag and drop functionality
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dropArea.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        dropArea.classList.add('active');
-      }, false);
-    });
-    ['dragleave', 'drop'].forEach(eventName => {
-      dropArea.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        dropArea.classList.remove('active');
-      }, false);
-    });
-    dropArea.addEventListener('drop', (e) => {
-      const files = Array.from(e.dataTransfer.files);
-      files.forEach(file => {
-        if (file.type.startsWith('audio/')) {
-          selectedAudioFiles.push(file);
-        } else {
-          selectedDocFiles.push(file);
-        }
-      });
-      updateFilePreview();
-    });
-
-    // Show drop area on focus
-    input.addEventListener('focus', () => { dropArea.style.display = 'block'; });
-    input.addEventListener('blur', () => { dropArea.style.display = 'none'; });
-
-    // Send message on Enter key
-    input.addEventListener("keypress", function (e) {
-      if (e.key === "Enter") {
+    // Allow sending message with Enter key
+    input.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
         sendMessage();
       }
     });
+
+    // Prevent body scrolling on mobile
+    document.addEventListener('touchmove', function(e) {
+      if (e.target === document.body || e.target === document.documentElement) {
+        e.preventDefault();
+      }
+    }, { passive: false });
   </script>
 </body>
 </html>
