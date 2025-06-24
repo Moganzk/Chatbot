@@ -1,0 +1,5 @@
+commands to check my bot health on cloud
+
+sudo systemctl status chatbot        # Check if it's running
+sudo systemctl restart chatbot       # Restart the service
+sudo journalctl -u chatbot -f        # See real-time logs
