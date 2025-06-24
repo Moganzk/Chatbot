@@ -32,17 +32,18 @@ CORS(app)
 # =====================
 # KNOWLEDGE BASES
 # =====================
-with open('intents.json') as f:
-    intents = json.load(f)
-    
-with open('agriculture_kb.json') as f:
-    agri_knowledge = json.load(f)
-    
-with open('farming_manuals.json') as f:
-    manuals = json.load(f)
-    
-with open('market_prices.json') as f:  # New: Crop prices
-    market_data = json.load(f)
+def safe_load_json(filename, default):
+    try:
+        with open(filename) as f:
+            data = json.load(f)
+            return data if data else default
+    except Exception:
+        return default
+
+intents = safe_load_json('intents.json', {"intents": []})
+agri_knowledge = safe_load_json('agriculture_kb.json', [])
+manuals = safe_load_json('farming_manuals.json', [])
+market_data = safe_load_json('market_prices.json', [])
 
 # =====================
 # SERVICE INITIALIZATION
@@ -187,9 +188,14 @@ def home():
 
 @app.route('/get', methods=['POST'])
 def chat():
+    # Always initialize session keys
+    if 'conversation' not in session:
+        session['conversation'] = []
+    if 'language' not in session:
+        session['language'] = 'en'
+
     start = time.time()
     user_input = request.form.get('msg', "").strip()
-    # Collect all audio and document files
     audio_files = [f for k, f in request.files.items() if k.startswith('voice')]
     doc_files = [f for k, f in request.files.items() if k.startswith('document')]
     location = request.form.get('location', "")

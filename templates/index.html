@@ -210,6 +210,12 @@
     </div>
   </div>
   <script>
+    // Choose backend URL based on environment
+    const BACKEND_URL =
+      window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+        ? "http://localhost:5000"
+        : "https://chatbot-i34n.onrender.com";
+
     const chatBox = document.getElementById('chat-box');
     const input = document.getElementById('user-input');
     const audioInput = document.getElementById('audio-input');
@@ -311,7 +317,7 @@
       selectedAudioFiles.forEach((file, i) => formData.append("voice" + i, file));
       selectedDocFiles.forEach((file, i) => formData.append("document" + i, file));
 
-      fetch("https://chatbot-i34n.onrender.com/get", {
+      fetch(`${BACKEND_URL}/get`, {
         method: "POST",
         body: formData,
       })
