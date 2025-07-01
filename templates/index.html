@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Mogan Chatbot</title>
   <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/000000/bot.png">
+  <!-- Highlight.js for code syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/vs2015.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <!-- Include Markdown parser for better formatting -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     :root {
       --bg-gradient-start: #e0e7ff;
@@ -26,6 +31,164 @@
       --timestamp-color: #a1a1aa;
       --file-preview-bg: #f3f4f6;
       --theme-toggle-bg: #e0e7ff;
+      --heading-color: #5b21b6;
+      --subheading-color: #6d28d9;
+      --bold-text-color: #4c1d95;
+      --blockquote-bg: #f1f5f9;
+      --blockquote-border: #a5b4fc;
+      --link-color: #3b82f6;
+    }
+
+    /* Enhanced markdown styling */
+    .bubble h1, .bubble h2, .bubble h3, .bubble h4 {
+      margin-top: 16px;
+      margin-bottom: 8px;
+      color: var(--heading-color);
+      font-weight: 600;
+    }
+    
+    .reasoning-indicator {
+      font-size: 0.75em;
+      background-color: rgba(79, 70, 229, 0.15);
+      color: var(--heading-color);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+    
+    /* Educational response indicator */
+    .educational-indicator {
+      font-size: 0.75em;
+      background-color: rgba(34, 197, 94, 0.15);
+      color: var(--heading-color);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+
+    .bubble h1 {
+      font-size: 1.5em;
+      border-bottom: 1px solid var(--blockquote-border);
+      padding-bottom: 8px;
+    }
+
+    .bubble h2 {
+      font-size: 1.35em;
+    }
+
+    .bubble h3 {
+      font-size: 1.2em;
+    }
+
+    .bubble h4 {
+      font-size: 1.1em;
+    }
+
+    .bubble ul, .bubble ol {
+      padding-left: 24px;
+      margin: 10px 0;
+    }
+
+    .bubble ul li, .bubble ol li {
+      margin: 4px 0;
+    }
+
+    .bubble strong {
+      color: var(--bold-text-color);
+      font-weight: 600;
+    }
+
+    .bubble blockquote {
+      background: var(--blockquote-bg);
+      border-left: 4px solid var(--blockquote-border);
+      padding: 8px 12px;
+      margin: 12px 0;
+      font-style: italic;
+    }
+
+    .bubble a {
+      color: var(--link-color);
+      text-decoration: underline;
+    }
+
+    .bubble table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 16px 0;
+    }
+
+    .bubble th, .bubble td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .bubble th {
+      background-color: var(--blockquote-bg);
+      font-weight: 600;
+    }
+
+    .bubble tr:nth-child(even) {
+      background-color: rgba(0,0,0,0.02);
+    }
+
+    /* Code block styling */
+    .code-block-wrapper {
+      margin: 12px 0;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #1e1e1e;
+      font-family: 'Consolas', 'Monaco', monospace;
+      position: relative;
+    }
+
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 12px;
+      background: #23272b;
+      color: #e0e0e0;
+      font-size: 0.85em;
+    }
+
+    .code-language {
+      text-transform: uppercase;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+
+    .copy-button {
+      background: #4a4a4a;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .copy-button:hover {
+      background: #10b981;
+    }
+
+    pre {
+      margin: 0;
+      padding: 12px;
+      overflow-x: auto;
+      background: #1e1e1e;
+      color: #fff;
+      font-size: 0.98em;
+      border-radius: 0 0 8px 8px;
+    }
+
+    code {
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.98em;
+      line-height: 1.5;
     }
 
     [data-theme="dark"] {
@@ -101,13 +264,44 @@
       padding: 18px 0;
       border-bottom: 1px solid var(--header-bg);
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
       gap: 10px;
       transition: all 0.3s ease;
       flex-shrink: 0;
       position: relative;
       z-index: 10;
+    }
+
+    #clearHistoryBtn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: transparent;
+      border: 1px solid var(--button-bg);
+      color: var(--button-bg);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.8em;
+      cursor: pointer;
+      margin-right: 8px;
+      transition: all 0.2s ease;
+    }
+    
+    #clearHistoryBtn:hover {
+      background: var(--button-bg);
+      color: white;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
     }
 
     .theme-toggle {
@@ -121,8 +315,7 @@
       justify-content: center;
       cursor: pointer;
       transition: all 0.3s ease;
-      position: absolute;
-      right: 15px;
+      position: relative;
     }
 
     .chat-box {
@@ -326,21 +519,48 @@
       background: var(--button-hover);
     }
 
-    .audio-label, .file-label {
+    .audio-label, .file-label, .reasoning-button {
       cursor: pointer;
       display: flex;
       align-items: center;
+      justify-content: center;
       margin: 0 4px;
       flex-shrink: 0;
     }
 
-    .audio-label svg, .file-label svg {
-      transition: fill 0.2s;
+    .audio-label svg, .file-label svg, .reasoning-button svg {
+      transition: fill 0.2s, stroke 0.2s;
       fill: var(--button-bg);
     }
 
-    .audio-label:hover svg, .file-label:hover svg {
+    .audio-label:hover svg, .file-label:hover svg, .reasoning-button:hover svg {
       fill: var(--button-hover);
+    }
+    
+    .reasoning-button {
+      background: transparent;
+      border: none;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+    }
+    
+    .reasoning-button svg {
+      fill: none;
+      stroke: var(--button-bg);
+    }
+    
+    .reasoning-button:hover svg {
+      stroke: var(--button-hover);
+    }
+    
+    .reasoning-button.active {
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 50%;
+    }
+    
+    .reasoning-button.active svg {
+      stroke: var(--button-hover);
     }
 
     .remove-btn {
@@ -438,18 +658,35 @@
 <body>
   <div class="chat-container">
     <div class="chat-header">
-      Talk to Mogan <span style="font-size:1.2em;">🤖</span>
-      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M12 3V4M12 20V21M21 12H20M4 12H3M18.364 5.636L17.656 6.344M6.344 17.656L5.636 18.364M18.364 18.364L17.656 17.656M6.344 6.344L5.636 5.636M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </button>
+      <div class="header-left">
+        <h1>Mogan Chatbot</h1>
+      </div>
+      <div class="header-right">
+        <button id="clearHistoryBtn" title="Clear conversation history">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18"></path>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+          </svg>
+          Clear
+        </button>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">
+          <svg id="dark-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          <svg id="light-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        </button>
+      </div>
     </div>
     <div class="chat-box" id="chat-box"></div>
     <div class="input-area">
       <div id="file-preview"></div>
       <div class="input-container">
         <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off" />
+        <button id="deep-reasoning-toggle" class="reasoning-button" title="Toggle deep reasoning mode">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 16.1A5 5 0 0 1 5.9 20M2 12.05A9 9 0 0 1 9.95 20M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"></path>
+            <line x1="2" y1="20" x2="2" y2="20"></line>
+          </svg>
+        </button>
         <label for="audio-input" class="audio-label" title="Send audio">
           <svg width="24" height="24" viewBox="0 0 24 24">
             <path d="M12 3a4 4 0 0 1 4 4v5a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4zm-7 8a1 1 0 0 1 2 0v1a7 7 0 0 0 14 0v-1a1 1 0 1 1 2 0v1a9 9 0 0 1-18 0v-1z"/>
@@ -468,6 +705,22 @@
   </div>
 
   <script>
+    // Configure marked.js for secure rendering
+    marked.setOptions({
+      renderer: new marked.Renderer(),
+      highlight: function(code, lang) {
+        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+        return hljs.highlight(code, { language }).value;
+      },
+      langPrefix: 'hljs language-', // highlight.js css classes
+      pedantic: false,
+      gfm: true,
+      breaks: true,
+      sanitize: false,
+      smartypants: false,
+      xhtml: false
+    });
+
     // Choose backend URL based on environment
     const BACKEND_URL =
       window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
@@ -480,10 +733,13 @@
     const docInput = document.getElementById('doc-input');
     const filePreview = document.getElementById('file-preview');
     const themeToggle = document.getElementById('theme-toggle');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    const deepReasoningToggle = document.getElementById('deep-reasoning-toggle');
 
     let selectedAudioFiles = [];
     let selectedDocFiles = [];
     let isTyping = false;
+    let deepReasoningMode = false;
 
     // Theme toggle functionality
     themeToggle.addEventListener('click', () => {
@@ -491,22 +747,38 @@
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', newTheme);
       localStorage.setItem('theme', newTheme);
-      updateThemeIcon(newTheme);
+      
+      // Toggle icon visibility
+      const darkIcon = document.getElementById('dark-icon');
+      const lightIcon = document.getElementById('light-icon');
+      
+      if (newTheme === 'dark') {
+        darkIcon.style.display = 'inline';
+        lightIcon.style.display = 'none';
+      } else {
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = 'inline';
+      }
     });
 
-    function updateThemeIcon(theme) {
-      const icon = themeToggle.querySelector('svg');
-      if (theme === 'dark') {
-        icon.innerHTML = '<path d="M12 3C12 3 12 5 12 7C8 7 6 9 6 12C6 15 9 18 12 18C15 18 17 16 17 12C17 10 19 9 19 9C17 9 16 10 16 12C16 14 14 16 12 16C10 16 8 14 8 12C8 10 9 8 12 7C12 9 12 3 12 3Z" fill="currentColor"/>';
-      } else {
-        icon.innerHTML = '<path d="M12 3V4M12 20V21M21 12H20M4 12H3M18.364 5.636L17.656 6.344M6.344 17.656L5.636 18.364M18.364 18.364L17.656 17.656M6.344 6.344L5.636 5.636M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
-      }
-    }
+    // No need for a separate function since we're only using it once
+    // The dark/light icon visibility is set directly in the theme initialization code
 
-    // Check for saved theme preference
+    // Check for saved theme preference or use system preference
     const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     document.documentElement.setAttribute('data-theme', savedTheme);
-    updateThemeIcon(savedTheme);
+    
+    // Initialize the icon visibility based on the current theme
+    const darkIcon = document.getElementById('dark-icon');
+    const lightIcon = document.getElementById('light-icon');
+    
+    if (savedTheme === 'dark') {
+      darkIcon.style.display = 'inline';
+      lightIcon.style.display = 'none';
+    } else {
+      darkIcon.style.display = 'none';
+      lightIcon.style.display = 'inline';
+    }
 
     function showTypingIndicator() {
       if (isTyping) return;
@@ -559,22 +831,64 @@
 
       const bubble = document.createElement('div');
       bubble.className = 'bubble ' + sender;
-      bubble.innerHTML = message;
-
-      // Add timestamp
-      const timestamp = document.createElement('div');
-      timestamp.className = 'timestamp';
-      const now = new Date();
-      timestamp.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-      bubble.appendChild(timestamp);
-
-      if (sender === 'user') {
-        row.appendChild(bubble);
-        row.appendChild(avatar);
+      
+      // Process bot messages with markdown and code blocks
+      if (sender === 'bot') {
+        // Store code blocks temporarily to prevent them from being processed by marked
+        const codeBlocks = [];
+        const placeholders = [];
+        
+        // Extract code blocks
+        const processedMessage = message.replace(/```(\w*)\n([\s\S]*?)\n```/g, (match, language, code) => {
+          const placeholder = `CODE_BLOCK_PLACEHOLDER_${codeBlocks.length}`;
+          codeBlocks.push({language: language || 'plaintext', code});
+          placeholders.push(placeholder);
+          return placeholder;
+        });
+        
+        // Process message with Markdown parser
+        let formattedText = marked.parse(processedMessage);
+        
+        // Handle special indicators (educational, deep reasoning)
+        formattedText = formattedText.replace(/📚 \*Educational Response\*/g, '<div class="educational-indicator">📚 Educational Response</div>');
+        formattedText = formattedText.replace(/🧠 \*Deep Reasoning Applied\*/g, '<div class="reasoning-indicator">🧠 Deep Reasoning Applied</div>');
+        formattedText = formattedText.replace(/🧠 \*Deep reasoning\*/g, '<div class="reasoning-indicator">🧠 Deep reasoning</div>');
+        
+        // Re-insert code blocks with proper formatting
+        placeholders.forEach((placeholder, index) => {
+          const {language, code} = codeBlocks[index];
+          const codeHtml = `<div class="code-block-wrapper">
+                              <div class="code-header">
+                                <span class="code-language">${language}</span>
+                                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                              </div>
+                              <pre><code class="language-${language}">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>
+                            </div>`;
+          formattedText = formattedText.replace(placeholder, codeHtml);
+        });
+        
+        bubble.innerHTML = formattedText;
+        
+        // Initialize highlight.js on the code blocks
+        bubble.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightElement(block);
+        });
       } else {
-        row.appendChild(avatar);
-        row.appendChild(bubble);
+        // For user messages, just use simple text
+        bubble.textContent = message;
       }
+
+      // Only add timestamp for user messages or bot messages without existing timestamp
+      if (sender === 'user' || !message.includes('<div class="timestamp">')) {
+        const timestamp = document.createElement('div');
+        timestamp.className = 'timestamp';
+        const now = new Date();
+        timestamp.textContent = now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
+        bubble.appendChild(timestamp);
+      }
+      
+      row.appendChild(avatar);
+      row.appendChild(bubble);
       chatBox.appendChild(row);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
@@ -665,6 +979,9 @@
       if (text) formData.append("msg", text);
       selectedAudioFiles.forEach((file, i) => formData.append("voice" + i, file));
       selectedDocFiles.forEach((file, i) => formData.append("document" + i, file));
+      
+      // Add deep reasoning mode parameter
+      formData.append("deep_reasoning", deepReasoningMode);
 
       fetch(`${BACKEND_URL}/get`, {
         method: "POST",
@@ -673,6 +990,12 @@
         .then((response) => response.json())
         .then((data) => {
           hideTypingIndicator(typingElement);
+          
+          // If deep reasoning mode was active, add an indicator
+          if (deepReasoningMode) {
+            data.response = `<div class="reasoning-indicator">🧠 Deep reasoning</div>${data.response}`;
+          }
+          
           appendMessage(data.response, 'bot');
           if (data.audioUrl) {
             new Audio(data.audioUrl).play();
@@ -704,6 +1027,105 @@
         e.preventDefault();
       }
     }, { passive: false });
+
+    // Function to copy code when the copy button is clicked
+    function copyCode(button) {
+      const codeBlock = button.closest('.code-block-wrapper').querySelector('code');
+      const codeToCopy = codeBlock.textContent;
+      
+      navigator.clipboard.writeText(codeToCopy)
+        .then(() => {
+          // Show "Copied!" feedback
+          const originalText = button.textContent;
+          button.textContent = "Copied!";
+          button.style.backgroundColor = "#10b981";  // Success color
+          
+          // Reset button after 1.5 seconds
+          setTimeout(() => {
+            button.textContent = originalText;
+            button.style.backgroundColor = "";
+          }, 1500);
+        })
+        .catch(err => {
+          console.error('Error copying text: ', err);
+          
+          // Show error feedback
+          const originalText = button.textContent;
+          button.textContent = "Error!";
+          button.style.backgroundColor = "#ef4444";  // Error color
+          
+          // Reset button after 1.5 seconds
+          setTimeout(() => {
+            button.textContent = originalText;
+            button.style.backgroundColor = "";
+          }, 1500);
+        });
+    }
+
+    // Clear conversation history
+    clearHistoryBtn.addEventListener('click', () => {
+      if (confirm("Are you sure you want to clear the conversation history?")) {
+        // Clear messages in the UI
+        const chatBox = document.getElementById('chat-box');
+        while (chatBox.firstChild) {
+          chatBox.removeChild(chatBox.firstChild);
+        }
+        
+        // Add a welcome message
+        appendMessage("Hi! I'm Mogan. How can I help you today?", "bot");
+        
+        // Clear conversation history on the server
+        fetch('/clear_history', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log("Conversation history cleared:", data);
+          // Optional: show a toast/notification that history was cleared
+        })
+        .catch(error => {
+          console.error("Error clearing conversation history:", error);
+        });
+      }
+    });
+
+    // Load chat history from localStorage
+    window.addEventListener('load', () => {
+      const savedHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
+      savedHistory.forEach(({ message, sender }) => {
+        appendMessage(message, sender);
+      });
+    });
+
+    // Save chat history to localStorage
+    const observer = new MutationObserver(() => {
+      const messages = [];
+      chatBox.querySelectorAll('.message-row').forEach(row => {
+        const message = row.querySelector('.bubble').innerHTML;
+        const sender = row.classList.contains('user') ? 'user' : 'bot';
+        messages.push({ message, sender });
+      });
+      localStorage.setItem('chatHistory', JSON.stringify(messages));
+    });
+
+    observer.observe(chatBox, { childList: true, subtree: true });
+
+    // Deep reasoning toggle functionality
+    deepReasoningToggle.addEventListener('click', () => {
+      deepReasoningMode = !deepReasoningMode;
+      if (deepReasoningMode) {
+        deepReasoningToggle.classList.add('active');
+        deepReasoningToggle.title = "Deep reasoning mode: ON";
+        input.placeholder = "Ask with deep reasoning...";
+      } else {
+        deepReasoningToggle.classList.remove('active');
+        deepReasoningToggle.title = "Deep reasoning mode: OFF";
+        input.placeholder = "Type your message...";
+      }
+    });
   </script>
 </body>
 </html>

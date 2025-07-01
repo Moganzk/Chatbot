@@ -13,3 +13,4 @@ python-pptx
 Pillow
 pytemperature
 openai
+groq
